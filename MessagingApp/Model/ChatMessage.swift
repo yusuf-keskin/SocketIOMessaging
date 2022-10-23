@@ -6,9 +6,13 @@
 //
 
 import Foundation
+import SocketIO
 
-struct Message : Codable {
+struct ChatMessage : Codable , SocketData{
     var date : String?
     var message : String?
     var nickname : String?
+    var userNickname : String?
 }
+
+

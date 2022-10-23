@@ -36,6 +36,8 @@ class ChatVC: UIViewController {
             self.chatTableView.reloadData()
             self.chatTableView.scrollToBottom(animated: false)
         }
+        
+        configureNavigation() 
         messageViewModel.getMessagesFromServer()
     }
     
@@ -54,6 +56,7 @@ class ChatVC: UIViewController {
         
         title = user.nickname
     }
+    
     @IBAction func btnSendClick(_ sender: Any) {
         guard txtMessage.text.count > 0,
               let message = txtMessage.text,
@@ -63,7 +66,7 @@ class ChatVC: UIViewController {
         }
         
         txtMessage.resignFirstResponder()
-        WebSockerService.shared.sendMessage(message: message, withNickname: name)
+        WebSockerService.shared.sendMessage(message: message, withNickname: nickName!){}
         txtMessage.text = nil
     }
     

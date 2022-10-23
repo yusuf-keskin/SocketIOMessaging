@@ -214,14 +214,16 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
     open func emit(_ event: String, _ items: SocketData..., completion: (() -> ())? = nil)  {
-        do {
-            try emit(event, with: items.map({ try $0.socketRepresentation() }), completion: completion)
-        } catch {
-            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
-                                             type: logType)
+        //DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
+            do {
+                try emit(event, with: items.map({ try $0.socketRepresentation() }), completion: completion)
+            } catch {
+                DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+                                                 type: logType)
 
-            handleClientEvent(.error, data: [event, items, error])
-        }
+                handleClientEvent(.error, data: [event, items, error])
+            }
+      //  }
     }
 
     /// Same as emit, but meant for Objective-C
@@ -336,7 +338,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
     ///
-    /// - parameter ack: The number for this ack.
+    /// - parameter ack: The number for this ack.currentUser
     /// - parameter data: The data sent back with this ack.
     @objc
     open func handleAck(_ ack: Int, data: [Any]) {

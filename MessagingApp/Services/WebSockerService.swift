@@ -17,6 +17,15 @@ let SOCKET_NEW_CHAT_MESSAGE = "newChatMessage"
 let SOCKET_CHAT_MESSAGE = "chatMessage"
 
 
+var currentUser : String  {
+    get {
+        UserDefaults.standard.string(forKey: "currentUser") ?? "No currentUser"
+    }
+    
+    set {
+        UserDefaults.standard.value(forKey: "currentUser")
+    }
+}
 
 
 final class WebSockerService: NSObject {
@@ -38,7 +47,7 @@ final class WebSockerService: NSObject {
         }
         
         manager = SocketManager(socketURL: url, config: [.log(true), .compress])
-           
+        
         guard let manager = manager else { return }
         socket = manager.socket(forNamespace: "/**********")
     }
@@ -55,32 +64,35 @@ final class WebSockerService: NSObject {
         socket.disconnect()
     }
     
-    func joinChatRoom(nickname: String, completion: () -> Void) {
+    func joinChatRoom(userName: String, completion: @escaping () -> Void) {
         
         guard let socket = manager?.defaultSocket else { return }
-        socket.emit(SOCKET_CONNECTUSER, nickname)
-        completion()
+        socket.emit(SOCKET_CONNECTUSER, userName) {
+            currentUser = userName
+            completion()
+        }
     }
-        
-    func leaveChatRoom(nickname: String, completion: () -> Void) {
+    
+    func leaveChatRoom(nickname: String, completion: @escaping () -> Void) {
         
         guard let socket = manager?.defaultSocket else { return }
-        socket.emit(SOCKET_EXIT_USER, nickname)
-        completion()
+        socket.emit(SOCKET_EXIT_USER, nickname) {
+            completion()
+        }
     }
     
     func participantList(completion: @escaping (_ userList: [User]?) -> Void) {
-
+        
         guard let socket = manager?.defaultSocket else  { return }
         socket.on(SOCKET_USERLIST) { [weak self] (result, ack) in
             print("No default socket");
-
+            
             guard result.count > 0,
-                let _ = self,
-                let user = result.first as? [[String: Any]],
-                let data = UIApplication.parseDataToJson(from: user) else {
+                  let _ = self,
+                  let user = result.first as? [[String: Any]],
+                  let data = UIApplication.parseDataToJson(from: user) else {
                 print("No result");
-                    return
+                return
             }
             
             do {
@@ -94,28 +106,29 @@ final class WebSockerService: NSObject {
         }
     }
     
-    func getMessage(completion: @escaping (_ messageInfo: Message?) -> Void) {
+    func getMessage(completion: @escaping (_ messageInfo: ChatMessage?) -> Void) {
         
         guard let socket = manager?.defaultSocket else { return }
         
         socket.on(SOCKET_NEW_CHAT_MESSAGE) { (dataArray, socketAck) -> Void in
-            
             var messageInfo = [String: Any]()
             
             guard let nickName = dataArray[0] as? String,
-                let message = dataArray[1] as? String,
-                let date = dataArray[2] as? String else{
-                    return
+                  let message = dataArray[1] as? String,
+                  let date = dataArray[2] as? String
+            else{
+                return
             }
             
             messageInfo["nickname"] = nickName
             messageInfo["message"] = message
             messageInfo["date"] = date
+  
             
             guard let data = UIApplication.parseDataToJson(from: messageInfo) else { return }
-
+            
             do {
-                let messageModel = try JSONDecoder().decode(Message.self, from: data)
+                let messageModel = try JSONDecoder().decode(ChatMessage.self, from: data)
                 completion(messageModel)
                 
             } catch let error {
@@ -125,9 +138,15 @@ final class WebSockerService: NSObject {
         }
     }
     
-    func sendMessage(message: String, withNickname nickname: String) {
+    func sendMessage(message: String, withNickname nickname: String, completion : @escaping () -> Void ) {
         
         guard let socket = manager?.defaultSocket else { return }
-        socket.emit(SOCKET_CHAT_MESSAGE, nickname, message)
+        socket.emit(SOCKET_CHAT_MESSAGE, nickname, message, currentUser)  {
+            print(message)
+            completion()
+        }
     }
+    
 }
+
+

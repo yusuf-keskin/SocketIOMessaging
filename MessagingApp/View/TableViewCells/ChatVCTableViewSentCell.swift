@@ -18,7 +18,7 @@ class ChatVCTableViewSentCell: UITableViewCell {
         // Initialization code
     }
 
-    func configureCell(_ message: Message) {
+    func configureCell(_ message: ChatMessage) {
         sentMessageLbl.backgroundColor = #colorLiteral(red: 0.9568627477, green: 0.8767130171, blue: 0.7569885576, alpha: 1)
         self.sentMessageLbl.text = message.message ?? ""
         self.sentMessageDate.text = message.date ?? ""

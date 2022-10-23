@@ -18,6 +18,8 @@ class ChatJoinVC: UIViewController {
         self.navigationController?.navigationBar.isHidden = true
     }
     
+    
+    
     private func joinChatRoom() {
         
         let alertController = UIAlertController(title: "Socket", message: "Please enter a name:", preferredStyle: .alert)
@@ -34,15 +36,17 @@ class ChatJoinVC: UIViewController {
                 
                 guard let nickName = textfield.text else { return }
                 
-                WebSockerService.shared.joinChatRoom(nickname: nickName) { [weak self] in
+                WebSockerService.shared.joinChatRoom(userName: nickName) { [weak self] in
                     guard let nickName = textfield.text,
                           let self = self else {
                         return
                     }
+                    currentUser = nickName
                     self.moveToNextScreen(nickName)
                 }
             }
         }
+        print("heyheyheyheyheyhe" + currentUser)
         
         alertController.addAction(OKAction)
         present(alertController, animated: true, completion: nil)
@@ -52,6 +56,7 @@ class ChatJoinVC: UIViewController {
     private func moveToNextScreen(_ name: String) {
         print("-----------******************-----------")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        print("heyheyheyheyheyhe" + currentUser)
         
         guard let usersVC = storyboard.instantiateViewController(withIdentifier: "UsersVC") as? UsersVC else { return }
         
