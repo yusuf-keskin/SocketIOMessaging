@@ -12,6 +12,8 @@ typealias SelectedUserMessagesHandler = (User)-> Void
 
 class UsersVC: UIViewController {
     
+    var socketService : SocketServiceProtocol = WebSockerService.shared
+    
     var userArray = [User]()
     var nickName: String?
     private var userModel = ChatViewModel()
@@ -91,7 +93,7 @@ extension UsersVC {
         
         guard let name = nickName else { return }
         
-        WebSockerService.shared.leaveChatRoom(nickname: name) { [weak self] in
+        socketService.leaveChatRoom(nickname: name) { [weak self] in
             
             guard let self = self else { return }
             self.navigationController?.popViewController(animated: true)

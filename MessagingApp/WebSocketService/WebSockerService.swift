@@ -16,10 +16,17 @@ let SOCKET_EXIT_USER = "exitUser"
 let SOCKET_NEW_CHAT_MESSAGE = "newChatMessage"
 let SOCKET_CHAT_MESSAGE = "chatMessage"
 
+protocol SocketServiceProtocol {
+    func establishConnection()
+    func closeConnection()
+    func joinChatRoom(nickname: String, completion: () -> Void)
+    func leaveChatRoom(nickname: String, completion: () -> Void)
+    func participantList(completion: @escaping (_ userList: [User]?) -> Void)
+    func getMessage(completion: @escaping (_ messageInfo: Message?) -> Void)
+    func sendMessage(message: String, withNickname nickname: String)
+}
 
-
-
-final class WebSockerService: NSObject {
+final class WebSockerService: NSObject, SocketServiceProtocol {
     
     static let shared = WebSockerService()
     

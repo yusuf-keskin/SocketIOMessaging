@@ -14,6 +14,8 @@ class ChatVC: UIViewController {
     
     private var messageViewModel = MessageViewModel()
     
+    var socketService : SocketServiceProtocol = WebSockerService.shared
+    
     @IBOutlet weak var txtMessage: UITextView! {
         didSet {
             txtMessage.layer.cornerRadius = txtMessage.frame.height/2
@@ -63,7 +65,7 @@ class ChatVC: UIViewController {
         }
         
         txtMessage.resignFirstResponder()
-        WebSockerService.shared.sendMessage(message: message, withNickname: name)
+        socketService.sendMessage(message: message, withNickname: name)
         txtMessage.text = nil
     }
     
@@ -79,7 +81,6 @@ extension ChatVC : UITableViewDataSource, UITableViewDelegate {
         let message = messageViewModel.observable_messageArray.value[indexPath.row]
         
         if message.nickname == self.nickName {
-            
             guard let cell = chatTableView.dequeueReusableCell(withIdentifier: "ChatVCTableViewSentCell") as? ChatVCTableViewSentCell
             else { return UITableView.emptyCell()}
             cell.configureCell(message)
@@ -89,6 +90,7 @@ extension ChatVC : UITableViewDataSource, UITableViewDelegate {
         guard let cell = chatTableView.dequeueReusableCell(withIdentifier: "ChatVCTableViewIncomingCell") as? ChatVCTableViewIncomingCell else {
             return UITableView.emptyCell() }
         cell.configureCell(message)
+        
         return cell
     }
 }

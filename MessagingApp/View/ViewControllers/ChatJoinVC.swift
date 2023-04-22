@@ -8,6 +8,8 @@
 import UIKit
 
 class ChatJoinVC: UIViewController {
+    
+    var socketService : SocketServiceProtocol = WebSockerService.shared
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,18 +25,18 @@ class ChatJoinVC: UIViewController {
         let alertController = UIAlertController(title: "Socket", message: "Please enter a name:", preferredStyle: .alert)
         alertController.addTextField(configurationHandler: nil)
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) -> Void in
+        let OKAction = UIAlertAction(title: "OK", style: .default) { [weak self] (action) -> Void in
             
             guard let textFields = alertController.textFields else { return }
             let textfield = textFields[0]
             
             if textfield.text?.count == 0 {
-                self.joinChatRoom()
+                self?.joinChatRoom()
             } else {
                 
                 guard let nickName = textfield.text else { return }
                 
-                WebSockerService.shared.joinChatRoom(nickname: nickName) { [weak self] in
+                self?.socketService.joinChatRoom(nickname: nickName) { [weak self] in
                     guard let nickName = textfield.text,
                           let self = self else {
                         return
